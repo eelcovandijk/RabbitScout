@@ -78,7 +78,6 @@ function Overview() {
           getOverview(),
           getQueues()
         ]);
-
         setOverviewData(overviewResponse);
         handleDataUpdate(overviewResponse);
 
@@ -129,7 +128,7 @@ function Overview() {
 
   return (
     <div className="space-y-4">
-      <OverviewStats data={overviewData} onDataUpdate={handleDataUpdate} />
+      <OverviewStats data={overviewData}/>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">

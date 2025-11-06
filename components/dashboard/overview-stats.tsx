@@ -1,10 +1,9 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatBytes, formatUptime, rabbitMQFetch, getNodeStats } from "@/lib/utils"
+import { formatBytes, formatUptime} from "@/lib/utils"
 import { MessageSquare, Network, Server } from "lucide-react"
-import { useEffect, useState } from "react"
-import { useRefreshStore } from "@/lib/store"
+import { useState } from "react"
 
 interface StatsCardProps {
   title: string
@@ -32,61 +31,11 @@ function StatsCard({ title, value, description, icon }: Readonly<StatsCardProps>
 
 interface OverviewStatsProps {
   data: any;
-  onDataUpdate?: (data: any) => void;
 }
 
-export function OverviewStats({ data: initialData, onDataUpdate }: Readonly<OverviewStatsProps>) {
+export function OverviewStats({ data: initialData }: Readonly<OverviewStatsProps>) {
   const [data, setData] = useState(initialData);
   const [nodeStats, setNodeStats] = useState<any>(null);
-  const { interval } = useRefreshStore();
-
-  useEffect(() => {
-    let mounted = true;
-
-    const refreshData = async () => {
-      try {
-        // First get overview to get node name
-        const newData = await rabbitMQFetch('/overview');
-        console.log('[OverviewStats] Overview data:', {
-          node: newData.node,
-          object_totals: newData.object_totals,
-          queue_totals: newData.queue_totals
-        });
-
-        // Then get node stats using the node name from overview
-        const newNodeStats = await getNodeStats();
-        console.log('[OverviewStats] Node Stats:', {
-          raw: newNodeStats,
-          memUsed: newNodeStats?.mem_used,
-          uptime: newNodeStats?.uptime,
-          name: newNodeStats?.name
-        });
-
-        if (mounted) {
-          setData(newData);
-          setNodeStats(newNodeStats);
-          onDataUpdate?.(newData);
-        }
-      } catch (error) {
-        console.error('[OverviewStats] Error refreshing data:', error);
-      }
-    };
-
-    refreshData();
-
-    let intervalId: NodeJS.Timeout | undefined;
-    
-    if (interval > 0) {
-      intervalId = setInterval(refreshData, interval * 1000);
-    }
-
-    return () => {
-      mounted = false;
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [interval, onDataUpdate]);
 
   const totalMessages = data.queue_totals?.messages ?? 0;
   const messagesReady = data.queue_totals?.messages_ready ?? 0;
