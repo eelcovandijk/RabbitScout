@@ -56,8 +56,9 @@ export class QueueManager {
   }
 
   public async sendMessage(queueName: string, messageId: string, message: QueueMessage): Promise<SendResponse> {
+    console.log(`Sending message to queue '${queueName}'.`);
     const channel = await this.createChannel();
-
+    console.log(`Channel created to send message to queue '${queueName}'.`);
     const messageToPublishOptions = (): Publish => {
       return {
         messageId,
@@ -72,13 +73,20 @@ export class QueueManager {
       }
     }
 
-    const messageSent = channel.sendToQueue(queueName, Buffer.from(message.payload), messageToPublishOptions());
+    try {
+      console.log(`Attempting to send message to queue '${queueName}'.`);
+      const messageSent = channel.sendToQueue(queueName, Buffer.from(message.payload), messageToPublishOptions());
 
-    await this.stopConsumerAndCloseChannel(channel)
+      await this.stopConsumerAndCloseChannel(channel)
 
-    return {
-      success: messageSent
-    };
+      return {
+        success: messageSent
+      };
+    } catch (error) {
+      console.error(`Error sending message to queue '${queueName}':`, error);
+      await this.stopConsumerAndCloseChannel(channel);
+      throw error;
+    }
   }
 
 

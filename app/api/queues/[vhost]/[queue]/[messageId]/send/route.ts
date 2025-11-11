@@ -28,7 +28,7 @@ export async function POST(
       queue: queue
     });
   } catch (error) {
-    console.error('[API Route] Error purging queue:', error)
-    return createApiErrorResponse('Failed to purge messages from RabbitMQ')
+    console.error('[API Route] Error sending message to queue:', error)
+    return createApiErrorResponse('Failed to send message to queue')
   }
 }
